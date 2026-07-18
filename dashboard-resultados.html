@@ -333,6 +333,19 @@
       border-color: var(--teal-mid);
     }
 
+    /* ── Aviso de errores de descarga ── */
+    .error-note {
+      background: #fdecea;
+      border: 1.5px solid #f5b7b1;
+      color: #922b21;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 12px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    .error-note.visible { display: block; }
+
     @media (max-width: 600px) {
       .main { padding: 20px 16px; }
       .topbar { padding: 16px 18px; }
@@ -371,7 +384,7 @@
   <input type="text" id="cfgUser" placeholder="tu-usuario-github" style="width:160px"
          oninput="guardarConfig()">
   <label>Repo</label>
-  <input type="text" id="cfgRepo" placeholder="sst-encuestas" style="width:140px"
+  <input type="text" id="cfgRepo" placeholder="sst-encuestas-datos" style="width:160px"
          oninput="guardarConfig()">
   <span class="config-note">⚠️ Este dashboard es solo para el administrador. No lo compartas con el equipo.</span>
 </div>
@@ -388,12 +401,15 @@
   <!-- Contenido dinámico -->
   <div id="dashContent" style="display:none">
 
+    <!-- Aviso si algún archivo no se pudo leer -->
+    <div class="error-note" id="errorNote"></div>
+
     <!-- KPIs -->
     <div class="kpi-grid">
       <div class="kpi-card">
         <div class="kpi-label">Respuestas recibidas</div>
         <div class="kpi-value" id="kpiTotal">0</div>
-        <div class="kpi-sub" id="kpiSubTotal">de 15 esperadas</div>
+        <div class="kpi-sub" id="kpiSubTotal">de 14 esperadas</div>
       </div>
       <div class="kpi-card accent">
         <div class="kpi-label">Participación</div>
@@ -401,7 +417,7 @@
         <div class="kpi-sub">del equipo</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Promedio satisfacción</div>
+        <div class="kpi-label">Promedio utilidad (P1)</div>
         <div class="kpi-value" id="kpiSat">—</div>
         <div class="kpi-sub">sobre 5 puntos</div>
       </div>
@@ -519,7 +535,7 @@
   // ══════════════════════════════════════════
   // ⚙️  CONFIGURACIÓN (se guarda en sessionStorage)
   // ══════════════════════════════════════════
-  const EQUIPO_TOTAL = 15; // ajusta si tienes más o menos personas
+  const EQUIPO_TOTAL = 14; // ajusta si tienes más o menos personas
 
   // Paleta de colores consistente
   const COLORS = {
@@ -570,10 +586,17 @@
 
     try {
       const res = await fetch(url, {
-        headers: { 'Authorization': `token ${cfg.token}` }
+        headers: {
+          'Authorization': `token ${cfg.token}`,
+          'Accept': 'application/vnd.github+json'
+        }
       });
       if (res.status === 404) {
         setBanner('Carpeta no encontrada. Aún no se han recibido respuestas para este bloque, o verifica la configuración.', false);
+        return;
+      }
+      if (res.status === 401 || res.status === 403) {
+        setBanner(`Error ${res.status}: tu token no tiene permiso para leer este repositorio privado. Verifica que el token tenga el scope "repo" (no solo "public_repo") y que no haya expirado.`, false);
         return;
       }
       if (!res.ok) {
@@ -586,28 +609,58 @@
       return;
     }
 
-    const jsonFiles = archivos.filter(f => f.name.endsWith('.json'));
+    const jsonFiles = archivos.filter(f => f.type === 'file' && f.name.toLowerCase().endsWith('.json'));
     if (jsonFiles.length === 0) {
       setBanner('No se han recibido respuestas todavía para este bloque.', false);
       return;
     }
 
-    // Descargar cada archivo JSON
+    // Descargar cada archivo JSON directamente vía la API de GitHub (contents endpoint),
+    // NO vía f.download_url (raw.githubusercontent.com), porque esa ruta no maneja bien
+    // la autenticación/CORS con tokens en repos privados y falla en silencio.
     const respuestas = [];
+    const errores = [];
     for (const f of jsonFiles) {
       try {
-        const r = await fetch(f.download_url, {
-          headers: { 'Authorization': `token ${cfg.token}` }
+        const r = await fetch(f.url, {
+          headers: {
+            'Authorization': `token ${cfg.token}`,
+            'Accept': 'application/vnd.github.raw+json'
+          }
         });
-        const data = await r.json();
+        if (!r.ok) {
+          errores.push(`${f.name} (HTTP ${r.status})`);
+          continue;
+        }
+        const texto = await r.text();
+        const data = JSON.parse(texto);
         respuestas.push(data);
       } catch(e) {
-        console.warn('Error leyendo', f.name);
+        console.warn('Error leyendo', f.name, e);
+        errores.push(f.name);
       }
+    }
+
+    mostrarErrores(errores, jsonFiles.length);
+
+    if (respuestas.length === 0) {
+      setBanner('Se encontraron archivos pero ninguno pudo leerse correctamente. Revisa la consola del navegador (F12) para más detalle.', false);
+      return;
     }
 
     datosGlobales = respuestas;
     renderDashboard(respuestas);
+  }
+
+  function mostrarErrores(errores, totalArchivos) {
+    const nota = document.getElementById('errorNote');
+    if (errores.length > 0) {
+      nota.classList.add('visible');
+      nota.innerHTML = `⚠️ Se encontraron ${totalArchivos} archivo(s) pero ${errores.length} no se pudieron leer: ${errores.join(', ')}`;
+    } else {
+      nota.classList.remove('visible');
+      nota.innerHTML = '';
+    }
   }
 
   // ── Render principal ──
