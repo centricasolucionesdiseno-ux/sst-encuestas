@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Encuesta SST – Bloque 2: Ergonomía y Ambiente de Trabajo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f0f9f8;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 32px 16px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 4px 32px rgba(2,128,144,0.10);
+      max-width: 680px;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: linear-gradient(135deg, #043A3F 0%, #028090 100%);
+      padding: 36px 40px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      background: rgba(2,195,154,0.15);
+    }
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: -40px; left: -40px;
+      width: 140px; height: 140px;
+      border-radius: 50%;
+      background: rgba(0,168,150,0.12);
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(2,195,154,0.25);
+      color: #02C39A;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+    .header h1 { color: #fff; font-size: 22px; font-weight: 700; line-height: 1.3; margin-bottom: 8px; position: relative; z-index: 1; }
+    .header p  { color: rgba(255,255,255,0.75); font-size: 13px; line-height: 1.6; position: relative; z-index: 1; }
+
+    /* ── Pantalla de token ── */
+    .token-screen {
+      padding: 36px 40px;
+      text-align: center;
+    }
+    .token-screen .lock-icon {
+      font-size: 40px;
+      margin-bottom: 14px;
+    }
+    .token-screen h2 { font-size: 18px; color: #043A3F; margin-bottom: 8px; }
+    .token-screen p  { font-size: 13px; color: #5C7A7D; line-height: 1.6; margin-bottom: 24px; }
+    .token-input {
+      width: 100%;
+      border: 1.5px solid #c8e8e5;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-family: monospace;
+      color: #1B3A3D;
+      outline: none;
+      text-align: center;
+      letter-spacing: 1px;
+      margin-bottom: 14px;
+      transition: border-color 0.2s;
+    }
+    .token-input:focus { border-color: #028090; }
+    .token-btn {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, #028090, #02C39A);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .token-btn:hover { opacity: 0.9; }
+    .token-note {
+      font-size: 11px;
+      color: #7aabab;
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+
+    /* ── Progreso ── */
+    .progress-wrap {
+      background: #f0f9f8;
+      padding: 14px 40px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .progress-bar-bg { flex: 1; height: 6px; background: #d0ecea; border-radius: 3px; overflow: hidden; }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #028090, #02C39A);
+      border-radius: 3px;
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+    .progress-label { font-size: 12px; color: #028090; font-weight: 600; white-space: nowrap; }
+
+    /* ── Formulario ── */
+    .form-body { padding: 32px 40px 40px; }
+    .email-section {
+      background: #f7fdfc;
+      border: 1.5px solid #b2e0da;
+      border-radius: 12px;
+      padding: 20px 22px;
+      margin-bottom: 28px;
+    }
+    .email-section label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: #028090;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 8px;
+    }
+    .email-section input {
+      width: 100%;
+      border: 1.5px solid #c8e8e5;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 14px;
+      color: #1B3A3D;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .email-section input:focus { border-color: #028090; }
+
+    /* ── Preguntas ── */
+    .question-block { margin-bottom: 28px; padding-bottom: 28px; border-bottom: 1px solid #eaf5f4; }
+    .question-block:last-of-type { border-bottom: none; }
+    .q-number {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 26px; height: 26px;
+      background: #028090; color: #fff;
+      font-size: 12px; font-weight: 700;
+      border-radius: 50%; margin-right: 8px; flex-shrink: 0;
+    }
+    .q-title { display: flex; align-items: flex-start; margin-bottom: 14px; }
+    .q-title span.text { font-size: 14px; font-weight: 600; color: #1B3A3D; line-height: 1.5; }
+    .q-required { color: #e05050; margin-left: 3px; font-size: 13px; }
+
+    .options { display: flex; flex-direction: column; gap: 9px; }
+    .option-label {
+      display: flex; align-items: center; gap: 10px;
+      cursor: pointer; padding: 10px 14px;
+      border-radius: 8px; border: 1.5px solid #ddf0ee;
+      background: #fafefe; transition: all 0.18s;
+      font-size: 13.5px; color: #2a5558;
+    }
+    .option-label:hover { border-color: #028090; background: #f0f9f8; }
+    .option-label input[type="radio"] { display: none; }
+    .option-label.selected { border-color: #028090; background: #e6f7f5; color: #043A3F; font-weight: 600; }
+    .radio-dot {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid #b2d8d4; background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: all 0.18s;
+    }
+    .option-label.selected .radio-dot { border-color: #028090; background: #028090; }
+    .radio-dot::after { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #fff; display: none; }
+    .option-label.selected .radio-dot::after { display: block; }
+
+    .likert-wrap { display: flex; gap: 8px; align-items: flex-end; }
+    .likert-labels { display: flex; justify-content: space-between; margin-top: 6px; padding: 0 2px; }
+    .likert-labels span { font-size: 10px; color: #7aabab; }
+    .likert-btn {
+      flex: 1; height: 40px;
+      border: 1.5px solid #c8e8e5; border-radius: 8px;
+      background: #fafefe; color: #5C7A7D;
+      font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all 0.18s;
+    }
+    .likert-btn:hover { border-color: #028090; background: #e6f7f5; color: #028090; }
+    .likert-btn.selected { background: #028090; border-color: #028090; color: #fff; }
+
+    .q-textarea {
+      width: 100%; border: 1.5px solid #c8e8e5; border-radius: 8px;
+      padding: 10px 14px; font-size: 13.5px; color: #1B3A3D;
+      resize: vertical; min-height: 90px; font-family: inherit;
+      outline: none; transition: border-color 0.2s;
+    }
+    .q-textarea:focus { border-color: #028090; }
+
+    .submit-btn {
+      width: 100%; padding: 15px;
+      background: linear-gradient(135deg, #028090, #02C39A);
+      color: #fff; font-size: 15px; font-weight: 700;
+      border: none; border-radius: 12px; cursor: pointer;
+      margin-top: 10px; transition: opacity 0.2s, transform 0.1s;
+    }
+    .submit-btn:hover { opacity: 0.93; }
+    .submit-btn:active { transform: scale(0.99); }
+    .submit-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .msg {
+      text-align: center; padding: 14px 20px; border-radius: 10px;
+      font-size: 13.5px; font-weight: 600; margin-top: 16px; display: none;
+    }
+    .msg.error   { background: #fdecea; color: #c0392b; display: block; }
+    .msg.success { background: #e6f7f5; color: #028090;  display: block; }
+
+    .success-screen { display: none; text-align: center; padding: 60px 40px; }
+    .success-screen .icon {
+      width: 72px; height: 72px;
+      background: linear-gradient(135deg, #028090, #02C39A);
+      border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; margin: 0 auto 20px; font-size: 32px;
+    }
+    .success-screen h2 { color: #043A3F; font-size: 22px; margin-bottom: 10px; }
+    .success-screen p  { color: #5C7A7D; font-size: 14px; line-height: 1.6; }
+
+    @media (max-width: 520px) {
+      .header, .form-body, .token-screen { padding-left: 22px; padding-right: 22px; }
+      .progress-wrap { padding: 12px 22px; }
+      .likert-wrap { gap: 5px; }
+      .likert-btn  { font-size: 12px; height: 36px; }
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+
+  <!-- Header siempre visible -->
+  <div class="header">
+    <div class="badge">Encuesta · Bloque 2 de 6</div>
+    <h1>Ergonomía y Ambiente de Trabajo</h1>
+    <p>Tu opinión nos ayuda a mejorar la campaña. Toma entre 3 y 5 minutos.<br>
+       Tus respuestas quedan registradas con tu correo corporativo.</p>
+  </div>
+
+  <!-- ① Pantalla de token (solo visible la primera vez) -->
+  <div class="token-screen" id="tokenScreen">
+    <div class="lock-icon">🔑</div>
+    <h2>Ingresa el código de acceso</h2>
+    <p>Para enviar tus respuestas necesitas el código que el equipo de Gerencias<br>
+       compartió contigo por correo interno.</p>
+    <input type="password" class="token-input" id="tokenInput"
+           placeholder="Pega aquí el código de acceso"
+           onkeydown="if(event.key==='Enter') verificarToken()">
+    <button class="token-btn" onclick="verificarToken()">Continuar →</button>
+    <p class="token-note">
+      🔒 El código no se almacena en ningún servidor externo.<br>
+      Solo se usa para guardar tus respuestas de forma segura.
+    </p>
+  </div>
+
+  <!-- ② Progreso (oculto hasta pasar el token) -->
+  <div class="progress-wrap" id="progressWrap" style="display:none">
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progressFill"></div>
+    </div>
+    <span class="progress-label" id="progressLabel">0 / 9</span>
+  </div>
+
+  <!-- ③ Formulario (oculto hasta pasar el token) -->
+  <div class="form-body" id="formBody" style="display:none">
+
+    <div class="email-section">
+      <label for="emailInput">📧 Tu correo corporativo</label>
+      <input type="email" id="emailInput"
+             placeholder="nombre@centricasoluciones.com" required>
+    </div>
+
+    <!-- P1 -->
+    <div class="question-block" data-q="1">
+      <div class="q-title">
+        <span class="q-number">1</span>
+        <span class="text">¿Qué tan útil te pareció la información sobre ergonomía en el puesto de trabajo?<span class="q-required">*</span></span>
+      </div>
+      <div class="likert-wrap" id="likert_1">
+        <button class="likert-btn" data-val="1" onclick="selectLikert(1,1)">1</button>
+        <button class="likert-btn" data-val="2" onclick="selectLikert(1,2)">2</button>
+        <button class="likert-btn" data-val="3" onclick="selectLikert(1,3)">3</button>
+        <button class="likert-btn" data-val="4" onclick="selectLikert(1,4)">4</button>
+        <button class="likert-btn" data-val="5" onclick="selectLikert(1,5)">5</button>
+      </div>
+      <div class="likert-labels"><span>Nada útil</span><span>Muy útil</span></div>
+    </div>
+
+    <!-- P2 -->
+    <div class="question-block" data-q="2">
+      <div class="q-title">
+        <span class="q-number">2</span>
+        <span class="text">Antes de esta campaña, ¿conocías la importancia de la postura correcta frente al computador?<span class="q-required">*</span></span>
+      </div>
+      <div class="options" id="opts_2">
+        <label class="option-label" onclick="selectOption(2,this)"><input type="radio" name="q2"><div class="radio-dot"></div>Sí, la conocía bien</label>
+        <label class="option-label" onclick="selectOption(2,this)"><input type="radio" name="q2"><div class="radio-dot"></div>La conocía parcialmente</label>
+        <label class="option-label" onclick="selectOption(2,this)"><input type="radio" name="q2"><div class="radio-dot"></div>No la conocía</label>
+        <label class="option-label" onclick="selectOption(2,this)"><input type="radio" name="q2"><div class="radio-dot"></div>No sabía que era tan importante</label>
+      </div>
+    </div>
+
+    <!-- P3 -->
+    <div class="question-block" data-q="3">
+      <div class="q-title">
+        <span class="q-number">3</span>
+        <span class="text">¿Has aplicado algún cambio ergonómico en tu puesto de trabajo después de leer los correos?<span class="q-required">*</span></span>
+      </div>
+      <div class="options" id="opts_3">
+        <label class="option-label" onclick="selectOption(3,this)"><input type="radio" name="q3"><div class="radio-dot"></div>Sí, ya ajusté mi silla, escritorio o pantalla</label>
+        <label class="option-label" onclick="selectOption(3,this)"><input type="radio" name="q3"><div class="radio-dot"></div>Lo haré pronto</label>
+        <label class="option-label" onclick="selectOption(3,this)"><input type="radio" name="q3"><div class="radio-dot"></div>Aún no lo he hecho</label>
+        <label class="option-label" onclick="selectOption(3,this)"><input type="radio" name="q3"><div class="radio-dot"></div>No considero que sea necesario</label>
+      </div>
+    </div>
+
+    <!-- P4 -->
+    <div class="question-block" data-q="4">
+      <div class="q-title">
+        <span class="q-number">4</span>
+        <span class="text">¿Sueles tomar pausas activas durante tu jornada laboral?<span class="q-required">*</span></span>
+      </div>
+      <div class="options" id="opts_4">
+        <label class="option-label" onclick="selectOption(4,this)"><input type="radio" name="q4"><div class="radio-dot"></div>Siempre</label>
+        <label class="option-label" onclick="selectOption(4,this)"><input type="radio" name="q4"><div class="radio-dot"></div>Frecuentemente</label>
+        <label class="option-label" onclick="selectOption(4,this)"><input type="radio" name="q4"><div class="radio-dot"></div>Ocasionalmente</label>
+        <label class="option-label" onclick="selectOption(4,this)"><input type="radio" name="q4"><div class="radio-dot"></div>Casi nunca</label>
+        <label class="option-label" onclick="selectOption(4,this)"><input type="radio" name="q4"><div class="radio-dot"></div>Nunca</label>
+      </div>
+    </div>
+
+    <!-- P5 -->
+    <div class="question-block" data-q="5">
+      <div class="q-title">
+        <span class="q-number">5</span>
+        <span class="text">¿Conocías el síndrome del túnel carpiano y sus factores de riesgo antes de esta campaña?<span class="q-required">*</span></span>
+      </div>
+      <div class="options" id="opts_5">
+        <label class="option-label" onclick="selectOption(5,this)"><input type="radio" name="q5"><div class="radio-dot"></div>Sí, lo conocía en detalle</label>
+        <label class="option-label" onclick="selectOption(5,this)"><input type="radio" name="q5"><div class="radio-dot"></div>Había escuchado sobre él pero no en profundidad</label>
+        <label class="option-label" onclick="selectOption(5,this)"><input type="radio" name="q5"><div class="radio-dot"></div>No lo conocía</label>
+        <label class="option-label" onclick="selectOption(5,this)"><input type="radio" name="q5"><div class="radio-dot"></div>No sabía que podía estar relacionado con el trabajo en casa</label>
+      </div>
+    </div>
+
+    <!-- P6 -->
+    <div class="question-block" data-q="6">
+      <div class="q-title">
+        <span class="q-number">6</span>
+        <span class="text">¿Qué tan claro fue el lenguaje usado en los correos sobre ergonomía?<span class="q-required">*</span></span>
+      </div>
+      <div class="likert-wrap" id="likert_6">
+        <button class="likert-btn" data-val="1" onclick="selectLikert(6,1)">1</button>
+        <button class="likert-btn" data-val="2" onclick="selectLikert(6,2)">2</button>
+        <button class="likert-btn" data-val="3" onclick="selectLikert(6,3)">3</button>
+        <button class="likert-btn" data-val="4" onclick="selectLikert(6,4)">4</button>
+        <button class="likert-btn" data-val="5" onclick="selectLikert(6,5)">5</button>
+      </div>
+      <div class="likert-labels"><span>Nada claro</span><span>Muy claro</span></div>
+    </div>
+
+    <!-- P7 -->
+    <div class="question-block" data-q="7">
+      <div class="q-title">
+        <span class="q-number">7</span>
+        <span class="text">¿Qué tan relevante consideras la información sobre ergonomía para tu salud a largo plazo?<span class="q-required">*</span></span>
+      </div>
+      <div class="options" id="opts_7">
+        <label class="option-label" onclick="selectOption(7,this)"><input type="radio" name="q7"><div class="radio-dot"></div>Muy relevante</label>
+        <label class="option-label" onclick="selectOption(7,this)"><input type="radio" name="q7"><div class="radio-dot"></div>Relevante</label>
+        <label class="option-label" onclick="selectOption(7,this)"><input type="radio" name="q7"><div class="radio-dot"></div>Poco relevante</label>
+        <label class="option-label" onclick="selectOption(7,this)"><input type="radio" name="q7"><div class="radio-dot"></div>No me parece relevante</label>
+      </div>
+    </div>
+
+    <!-- P8 -->
+    <div class="question-block" data-q="8">
+      <div class="q-title">
+        <span class="q-number">8</span>
+        <span class="text">¿Has sentido fatiga visual, dolor de espalda o molestias en las manos después de jornadas largas frente al computador?<span class="q-required">*</span></span>
+      </div>
+      <div class="options" id="opts_8">
+        <label class="option-label" onclick="selectOption(8,this)"><input type="radio" name="q8"><div class="radio-dot"></div>Sí, frecuentemente</label>
+        <label class="option-label" onclick="selectOption(8,this)"><input type="radio" name="q8"><div class="radio-dot"></div>Sí, ocasionalmente</label>
+        <label class="option-label" onclick="selectOption(8,this)"><input type="radio" name="q8"><div class="radio-dot"></div>Rara vez</label>
+        <label class="option-label" onclick="selectOption(8,this)"><input type="radio" name="q8"><div class="radio-dot"></div>No, nunca he tenido esas molestias</label>
+      </div>
+    </div>
+
+    <!-- P9 -->
+    <div class="question-block" data-q="9">
+      <div class="q-title">
+        <span class="q-number">9</span>
+        <span class="text">¿Qué probabilidad hay de que recomiendes esta campaña a un compañero de otra empresa?<span class="q-required">*</span></span>
+      </div>
+      <div class="likert-wrap" id="likert_9">
+        <button class="likert-btn" data-val="1" onclick="selectLikert(9,1)">1</button>
+        <button class="likert-btn" data-val="2" onclick="selectLikert(9,2)">2</button>
+        <button class="likert-btn" data-val="3" onclick="selectLikert(9,3)">3</button>
+        <button class="likert-btn" data-val="4" onclick="selectLikert(9,4)">4</button>
+        <button class="likert-btn" data-val="5" onclick="selectLikert(9,5)">5</button>
+      </div>
+      <div class="likert-labels"><span>Nada probable</span><span>Muy probable</span></div>
+    </div>
+
+    <!-- P10 -->
+    <div class="question-block" data-q="10">
+      <div class="q-title">
+        <span class="q-number">10</span>
+        <span class="text">¿Tienes algún comentario o sugerencia para mejorar la información sobre ergonomía? <span style="color:#7aabab;">(opcional)</span></span>
+      </div>
+      <textarea class="q-textarea" id="q10_text" placeholder="Escribe aquí tu comentario..."></textarea>
+    </div>
+
+    <button class="submit-btn" id="submitBtn" onclick="enviarEncuesta()">
+      Enviar mis respuestas ✓
+    </button>
+    <div class="msg" id="statusMsg"></div>
+
+  </div><!-- /form-body -->
+
+  <!-- ④ Pantalla éxito -->
+  <div class="success-screen" id="successScreen">
+    <div class="icon">✓</div>
+    <h2>¡Respuestas enviadas!</h2>
+    <p>Gracias por participar. Tus respuestas han quedado registradas<br>
+       y nos ayudarán a mejorar la campaña <strong>«Tu bienestar, nuestra prioridad»</strong>.</p>
+    <p style="margin-top:16px; color:#028090; font-size:13px;">Nos vemos la próxima semana 📩</p>
+  </div>
+
+</div><!-- /card -->
+
+<script>
+  // ══════════════════════════════════════════════════════
+  // ⚙️  CONFIGURACIÓN — usuario, repo y carpeta
+  // ══════════════════════════════════════════════════════
+  const CONFIG = {
+    GITHUB_USER: "centricasolucionesdiseno-ux",
+    GITHUB_REPO: "sst-encuestas-datos",
+    CARPETA:     "respuestas/bloque2",  // ← carpeta para Bloque 2
+    RAMA:        "main",
+    DOMINIO:     "centricasoluciones.com"
+  };
+
+  let RUNTIME_TOKEN = "";
+  const answers = {};
+
+  // ── Verificar token ──
+  function verificarToken() {
+    const t = document.getElementById('tokenInput').value.trim();
+    if (!t || !t.startsWith('ghp_') || t.length < 20) {
+      alert('El código de acceso no parece válido. Verifica que lo hayas copiado completo.');
+      return;
+    }
+    RUNTIME_TOKEN = t;
+    document.getElementById('tokenScreen').style.display  = 'none';
+    document.getElementById('progressWrap').style.display = 'flex';
+    document.getElementById('formBody').style.display     = 'block';
+  }
+
+  // ── Selección radio ──
+  function selectOption(qNum, labelEl) {
+    labelEl.parentElement.querySelectorAll('.option-label').forEach(l => l.classList.remove('selected'));
+    labelEl.classList.add('selected');
+    answers[`q${qNum}`] = labelEl.textContent.trim();
+    updateProgress();
+  }
+
+  // ── Selección Likert ──
+  function selectLikert(qNum, val) {
+    const wrap = document.getElementById(`likert_${qNum}`);
+    wrap.querySelectorAll('.likert-btn').forEach(b => b.classList.remove('selected'));
+    wrap.querySelector(`[data-val="${val}"]`).classList.add('selected');
+    answers[`q${qNum}`] = val;
+    updateProgress();
+  }
+
+  // ── Progreso ──
+  function updateProgress() {
+    const filled = Object.keys(answers).filter(k => k !== 'q10').length;
+    const pct = Math.round((filled / 9) * 100);
+    document.getElementById('progressFill').style.width  = pct + '%';
+    document.getElementById('progressLabel').textContent = `${filled} / 9`;
+  }
+
+  // ── Validación ──
+  function validar() {
+    const email = document.getElementById('emailInput').value.trim();
+    if (!email || !email.includes('@') || !email.includes(CONFIG.DOMINIO)) {
+      return `Por favor ingresa tu correo @${CONFIG.DOMINIO}.`;
+    }
+    for (let i = 1; i <= 9; i++) {
+      if (!answers[`q${i}`]) return `La pregunta ${i} es obligatoria.`;
+    }
+    return null;
+  }
+
+  // ── Envío a GitHub ──
+  async function enviarEncuesta() {
+    const error = validar();
+    if (error) { showMsg(error, 'error'); return; }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+    hideMsg();
+
+    const email    = document.getElementById('emailInput').value.trim().toLowerCase();
+    const ahora    = new Date();
+    const fechaStr = ahora.toLocaleDateString('es-CO', {
+      year:'numeric', month:'2-digit', day:'2-digit',
+      hour:'2-digit', minute:'2-digit'
+    });
+
+    const payload = {
+      meta: {
+        bloque:    "Bloque 2 – Ergonomía y Ambiente de Trabajo",
+        correo:    email,
+        fecha:     fechaStr,
+        timestamp: ahora.toISOString()
+      },
+      respuestas: {
+        q1_utilidad_ergonomia:       { pregunta: "¿Qué tan útil te pareció la información sobre ergonomía?", respuesta: answers.q1 },
+        q2_conocia_postura:          { pregunta: "¿Conocías la importancia de la postura correcta?", respuesta: answers.q2 },
+        q3_aplico_cambios:           { pregunta: "¿Has aplicado cambios ergonómicos en tu puesto?", respuesta: answers.q3 },
+        q4_pausas_activas:           { pregunta: "¿Sueles tomar pausas activas durante la jornada?", respuesta: answers.q4 },
+        q5_tunel_carpiano:           { pregunta: "¿Conocías el síndrome del túnel carpiano?", respuesta: answers.q5 },
+        q6_claridad_lenguaje:        { pregunta: "¿Qué tan claro fue el lenguaje sobre ergonomía?", respuesta: answers.q6 },
+        q7_relevancia_ergonomia:     { pregunta: "¿Qué tan relevante es la info de ergonomía para tu salud?", respuesta: answers.q7 },
+        q8_molestias_fisicas:        { pregunta: "¿Has sentido molestias físicas (espalda, manos, vista)?", respuesta: answers.q8 },
+        q9_nps:                      { pregunta: "¿Probabilidad de recomendar la campaña?", respuesta: answers.q9 },
+        q10_comentario:              { pregunta: "Comentarios abiertos", respuesta: document.getElementById('q10_text').value.trim() || "(sin comentario)" }
+      }
+    };
+
+    const nombreArchivo = `${email.replace(/[@.]/g,'_')}_${Date.now()}.json`;
+    const rutaArchivo   = `${CONFIG.CARPETA}/${nombreArchivo}`;
+    const contenido     = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
+    const url           = `https://api.github.com/repos/${CONFIG.GITHUB_USER}/${CONFIG.GITHUB_REPO}/contents/${rutaArchivo}`;
+
+    try {
+      const res = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `token ${RUNTIME_TOKEN}`,
+          'Content-Type':  'application/json'
+        },
+        body: JSON.stringify({
+          message: `Respuesta B2: ${email} – ${fechaStr}`,
+          content: contenido,
+          branch:  CONFIG.RAMA
+        })
+      });
+
+      if (res.ok) {
+        document.getElementById('formBody').style.display     = 'none';
+        document.getElementById('progressWrap').style.display = 'none';
+        document.getElementById('successScreen').style.display = 'block';
+      } else {
+        const err = await res.json();
+        showMsg(`Error al guardar (${res.status}): ${err.message || 'Intenta de nuevo.'}`, 'error');
+        btn.disabled    = false;
+        btn.textContent = 'Enviar mis respuestas ✓';
+      }
+    } catch(e) {
+      showMsg('Error de conexión. Verifica tu internet e intenta de nuevo.', 'error');
+      btn.disabled    = false;
+      btn.textContent = 'Enviar mis respuestas ✓';
+    }
+  }
+
+  function showMsg(msg, type) {
+    const el = document.getElementById('statusMsg');
+    el.textContent = msg;
+    el.className   = `msg ${type}`;
+  }
+  function hideMsg() {
+    document.getElementById('statusMsg').className = 'msg';
+  }
+</script>
+</body>
+</html>
